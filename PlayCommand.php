@@ -87,14 +87,18 @@ class PlayCommand extends Command
         $question->setValidator(function($answer) use ($output) {
             $move = array_search(strtolower(trim($answer)), $this->moves);
             if ($move === false) {
-                $output->writeln('<error></error>');
                 throw new \RuntimeException('Wrong move, man. Try again.');
             }
             return $move;
         });
 
         // Get a move as an integer.
-        $move = $helper->ask($input, $output, $question);
+        try {
+            $move = $helper->ask($input, $output, $question);
+        } catch (\RuntimeException $e) {
+            $output->writeln('<error>Read the rules.</error>');
+            return;
+        }
         $gameMove = $this->pickMove($move);
 
         $output->writeln('I played: ' . $this->moveToString($gameMove));
