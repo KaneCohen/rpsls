@@ -16,7 +16,11 @@ class PlayCommand extends Command
     const LIZARD   = 3;
     const SPOCK    = 4;
 
-    // Lower-case list of moves for validation.
+    /**
+     * Moves used in validation.
+     *
+     * @var array
+     */
     private $moves = [
         self::ROCK     => 'rock',
         self::PAPER    => 'paper',
@@ -25,7 +29,11 @@ class PlayCommand extends Command
         self::SPOCK    => 'spock'
     ];
 
-    // Hard coded winners.
+    /**
+     * Hard coded winners and win scenarios.
+     *
+     * @var array
+     */
     private $winners = [
         self::ROCK     => [
             self::SCISSORS => 'Rock crushes scissors',
@@ -49,19 +57,31 @@ class PlayCommand extends Command
         ]
     ];
 
+    /**
+     * Command configuration.
+     */
     protected function configure()
     {
         $this->setName('play')
             ->setDescription('Play a game of Rock-Paper-Scissors-Lizard-Spock');
     }
 
+    /**
+     * Command execution.
+     *
+     * @param InputInterface  $input
+     * @param OutputInterface $output
+     * @return void
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $helper = $this->getHelper('question');
+        // Initial messages.
         $output->writeln('<info>Game begins!</info>');
         $output->writeln('');
         $output->writeln('<comment>Possible moves: Rock, Paper, Scissors, Lizard, Spock</comment>');
 
+        // Validation
+        $helper = $this->getHelper('question');
         $question = new Question('Your move: ');
         $question->setMaxAttempts(3);
         $question->setValidator(function($answer) use ($output) {
@@ -73,6 +93,7 @@ class PlayCommand extends Command
             return $move;
         });
 
+        // Get a move as an integer.
         $move = $helper->ask($input, $output, $question);
         $gameMove = $this->pickMove($move);
 
@@ -80,16 +101,35 @@ class PlayCommand extends Command
         $output->writeln('Winner: ' . $this->determineWinner($move, $gameMove));
     }
 
+    /**
+     * Converts move integer to string.
+     *
+     * @param int $move
+     * @return string
+     */
     protected function moveToString($move)
     {
         return ucfirst($this->moves[$move]);
     }
 
+    /**
+     * Returns random integer as one of the valid move.
+     *
+     * @param $move
+     * @return int
+     */
     protected function pickMove($move)
     {
         return array_rand($this->moves);
     }
 
+    /**
+     * Returns string marking outcome of the game.
+     *
+     * @param $playerMove
+     * @param $gameMove
+     * @return string
+     */
     protected function determineWinner($playerMove, $gameMove)
     {
         $userWon = isset($this->winners[$playerMove][$gameMove]);
@@ -100,5 +140,4 @@ class PlayCommand extends Command
 
         return 'Tie!';
     }
-
 }
